@@ -1,7 +1,12 @@
 <template>
   <div class="hello">
-    <p><input type='text' v-model='msg'></p>
-    <p>{{msg}}</p>
+    <ul>
+      <li v-for='todo in todos' >{{todo}}</li>
+    </ul>
+    <form @submit.prevent='addItem'>
+      <input type='text' v-model='newTask'>
+      <input type='submit' value='追加' >
+    </form>
   </div>
 </template>
 
@@ -10,7 +15,22 @@ export default {
   name: 'HelloWorld',
   data () {
     return {
-      msg: 'Hello World.'
+      newTask:'',
+      todos : [
+        { name: "task 1", isDone: false },
+        { name: "task 2", isDone: false },
+        { name: "task 3", isDone: false },
+        { name: "task 4", isDone: false }   
+      ]
+    }
+  },
+  methods:{
+    addItem: function(){
+      this.todos.push({
+        name: this.newTask,
+        isDone: false
+      })
+      this.newTask=''
     }
   }
 }
@@ -18,18 +38,5 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h1, h2 {
-  font-weight: normal;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
+
 </style>
