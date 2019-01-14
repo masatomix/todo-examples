@@ -1,85 +1,17 @@
 <template>
   <div class="hello">
-    <h1>{{ msg }}</h1>
-    <h2>Essential Links</h2>
+    <h1>My Todo Task<span class='info'>({{remainingTask.length}}/{{todos.length}})</span></h1>
     <ul>
-      <li>
-        <a
-          href="https://vuejs.org"
-          target="_blank"
-        >
-          Core Docs
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://forum.vuejs.org"
-          target="_blank"
-        >
-          Forum
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://chat.vuejs.org"
-          target="_blank"
-        >
-          Community Chat
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://twitter.com/vuejs"
-          target="_blank"
-        >
-          Twitter
-        </a>
-      </li>
-      <br>
-      <li>
-        <a
-          href="http://vuejs-templates.github.io/webpack/"
-          target="_blank"
-        >
-          Docs for This Template
-        </a>
-      </li>
+      <li v-for='(todo,index) in todos' >
+        <input type='checkbox' v-model='todo.isDone'>
+        <span v-bind:class='{done: todo.isDone}'>{{todo.name}}</span>
+        <span @click='deleteTask(index)' class='xButton'>[x]</span>
+        </li>
     </ul>
-    <h2>Ecosystem</h2>
-    <ul>
-      <li>
-        <a
-          href="http://router.vuejs.org/"
-          target="_blank"
-        >
-          vue-router
-        </a>
-      </li>
-      <li>
-        <a
-          href="http://vuex.vuejs.org/"
-          target="_blank"
-        >
-          vuex
-        </a>
-      </li>
-      <li>
-        <a
-          href="http://vue-loader.vuejs.org/"
-          target="_blank"
-        >
-          vue-loader
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/awesome-vue"
-          target="_blank"
-        >
-          awesome-vue
-        </a>
-      </li>
-    </ul>
+    <form @submit.prevent='addTask'>
+      <input type='text' v-model='newTask'>
+      <input type='submit' value='追加' >
+    </form>
   </div>
 </template>
 
@@ -88,7 +20,32 @@ export default {
   name: 'HelloWorld',
   data () {
     return {
-      msg: 'Welcome to Your Vue.js App'
+      newTask:'',
+      todos : [
+        { name: "task 1", isDone: true },
+        { name: "task 2", isDone: false },
+        { name: "task 3", isDone: false },
+        { name: "task 4", isDone: false }   
+      ]
+    }
+  },
+  methods:{
+    addTask: function(){
+      this.todos.push({
+        name: this.newTask,
+        isDone: false
+      })
+      this.newTask=''
+    },
+    deleteTask: function(index){
+      this.todos.splice(index,1)
+    }
+  },
+  computed:{
+    remainingTask: function(){
+      return this.todos.filter(function(todo){
+        return !todo.isDone
+      })
     }
   }
 }
@@ -96,18 +53,25 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h1, h2 {
-  font-weight: normal;
+h1 {
+  font-size: 16px;
+  border-bottom: 1px solid #ddd;
+  padding: 16px 0;
 }
-ul {
-  list-style-type: none;
-  padding: 0;
+
+.xButton{
+  cursor: pointer;
+  font-size: 12px;
+  color: red
 }
-li {
-  display: inline-block;
-  margin: 0 10px;
+
+li > span.done{
+  text-decoration: line-through;
+  color:#bbb
 }
-a {
-  color: #42b983;
+
+.info {
+  color: #bbb;
+  font-size: 12px;
 }
 </style>
