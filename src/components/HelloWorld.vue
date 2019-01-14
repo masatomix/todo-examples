@@ -22,13 +22,19 @@ export default {
   data () {
     return {
       newTask:'',
-      todos : [
-        { name: "task 1", isDone: true },
-        { name: "task 2", isDone: false },
-        { name: "task 3", isDone: false },
-        { name: "task 4", isDone: false }   
-      ]
+      todos : []
     }
+  },
+  watch: {
+    todos: {
+      handler: function() {
+        localStorage.setItem('todos',JSON.stringify(this.todos))
+      },
+      deep: true
+    }
+  },
+  created: function() {
+    this.todos = JSON.parse(localStorage.getItem("todos")) || [];
   },
   methods:{
     addTask: function(){
