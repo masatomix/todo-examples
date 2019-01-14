@@ -1,6 +1,7 @@
 <template>
   <div class="hello">
-    <h1>My Todo Task<span class='info'>({{remainingTask.length}}/{{todos.length}})</span></h1>
+    <h1>
+      <button @click="deleteEndTask">完了タスクの削除</button>My Todo Task<span class='info'>({{remainingTask.length}}/{{todos.length}})</span></h1>
     <ul>
       <li v-for='(todo,index) in todos' >
         <input type='checkbox' v-model='todo.isDone'>
@@ -39,6 +40,9 @@ export default {
     },
     deleteTask: function(index){
       this.todos.splice(index,1)
+    },
+    deleteEndTask:function(){
+      this.todos = this.remainingTask;
     }
   },
   computed:{
@@ -57,6 +61,10 @@ h1 {
   font-size: 16px;
   border-bottom: 1px solid #ddd;
   padding: 16px 0;
+}
+
+h1 > button {
+  float: right;
 }
 
 .xButton{
