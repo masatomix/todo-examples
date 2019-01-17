@@ -3,6 +3,13 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
+import firebase from 'firebase'
+import firebaseConfig from '@/firebaseConfig'
+
+// if (!firebase.apps.length) {
+firebase.initializeApp(firebaseConfig)
+// }
+firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
 
 Vue.config.productionTip = false
 
