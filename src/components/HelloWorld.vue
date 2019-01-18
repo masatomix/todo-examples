@@ -1,12 +1,12 @@
 <template>
   <div class="hello">
     <h1>
-      <button @click="deleteEndTask">完了タスクの削除</button>My Todo Task<span class='info'>({{remainingTask.length}}/{{todos.length}})</span></h1>
+      <button @click="deleteEndTask">完了タスクの削除</button>My Todo Task<span class='info'>({{Object.keys(remainingTask).length}}/{{Object.keys(todos).length}})</span></h1>
     <ul>
-      <li v-for='todo in todos' :key='todo.id'>
+      <li v-for='(todo,key) in todos' :key='key'>
         <input type='checkbox' v-model='todo.isDone'>
         <span v-bind:class='{done: todo.isDone}'>{{todo.name}}</span>
-        <span @click='deleteTask(todo.id)' class='xButton'>[x]</span>
+        <span @click='deleteTask(key)' class='xButton'>[x]</span>
         </li>
     </ul>
     <form @submit.prevent='addTask'>
@@ -24,7 +24,7 @@ export default {
   data () {    // 画面で使用する変数を定義する場所
     return {
       newTask: '',
-      todos: [],
+      todos: {},
       db: firebase.firestore()
     }
   },
@@ -44,8 +44,9 @@ export default {
       this.loading = false
       querySnapshot.forEach(doc => {
         const task = doc.data()
-        task.id = doc.id
-        me.todos.push(task)
+        // me.todos[doc.id]=task
+        me.$set(me.todos, doc.id, task);
+        // https://jp.vuejs.org/2016/02/06/common-gotchas/
       })
     })
   },
@@ -53,7 +54,6 @@ export default {
     addTask: function () {
       const me = this
       const task = {
-        id: '',
         name: this.newTask,
         isDone: false
       }
@@ -61,43 +61,57 @@ export default {
         .collection('todos')
         .add(task)
         .then(function (docref) {
-          task.id = docref.id
-          me.todos.push(task)
+          // me.todos[docref.id]=task
+          me.$set(me.todos, docref.id, task);
         })
       this.newTask = ''
     },
 
     deleteTask: function (key) {
-      this.todos.forEach((todo, index) => {
-        if (todo.id == key) {
-          this.todos.splice(index, 1)
-        }
-      })
+      this.$delete(this.todos, key)
       this.db
         .collection('todos')
         .doc(key)
         .delete()
     },
     deleteEndTask: function () {
-      const doneTasks = this.todos.filter(todo => {
-        return todo.isDone
-      })
-      
+      const doneTasks = {}
+      Object.keys(this.todos)
+        .filter(key => this.todos[key].isDone)
+        .forEach(key => {
+          doneTasks[key] = this.todos[key]
+          this.db
+            .collection("todos")
+            .doc(key)
+            .delete()
+        })
       this.todos = this.remainingTask
-
-      for (let task of doneTasks) {
-        this.db
-          .collection('todos')
-          .doc(task.id)
-          .delete()
-      }
     }
+
+
   },
   computed: {
     remainingTask: function () {
-      return this.todos.filter(function (todo) {
-        return !todo.isDone
-      })
+
+      // 関数をつかう場合
+      const me = this
+      const remainingTask = {}
+      Object.keys(this.todos)
+        .filter(function(key) {
+          return !me.todos[key].isDone
+        })
+        .forEach(key => (remainingTask[key] = me.todos[key]));
+        
+    
+      // // Arrow関数で 簡単に書いた場合
+      // return Object.keys(this.todos)
+      //   .filter(key => !this.todos[key].isDone)
+      //   .map(key => this.todos[key])
+
+      // return this.todos.filter(function (todo) {
+      //   return !todo.isDone
+      // })
+      return remainingTask   
     }
   }
 }
