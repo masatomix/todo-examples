@@ -3,6 +3,14 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
+import store from '@/store'
+import firebase from 'firebase'
+import firebaseConfig from '@/firebaseConfig'
+
+// if (!firebase.apps.length) {
+firebase.initializeApp(firebaseConfig)
+// }
+firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
 
 Vue.config.productionTip = false
 
@@ -10,6 +18,7 @@ Vue.config.productionTip = false
 new Vue({
   el: '#app',
   router,
+  store,
   components: { App },
   template: '<App/>'
 })

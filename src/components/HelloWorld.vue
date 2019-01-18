@@ -1,59 +1,98 @@
 <template>
-  <div class="hello">
+  <main v-if='$store.state.loginStatus'>
     <h1>
       <button @click="deleteEndTask">完了タスクの削除</button>My Todo Task<span class='info'>({{remainingTask.length}}/{{todos.length}})</span></h1>
     <ul>
-      <li v-for='(todo,index) in todos' >
-        <input type='checkbox' v-model='todo.isDone'>
+      <li v-for='todo in todos' :key='todo.id'>
+        <input type='checkbox' v-model='todo.isDone' @click='done(todo)' >
         <span v-bind:class='{done: todo.isDone}'>{{todo.name}}</span>
-        <span @click='deleteTask(index)' class='xButton'>[x]</span>
+        <span @click='deleteTask(todo.id)' class='xButton'>[x]</span>
         </li>
     </ul>
     <form @submit.prevent='addTask'>
       <input type='text' v-model='newTask'>
       <input type='submit' value='追加' >
     </form>
-  </div>
+  </main>
 </template>
 
 <script>
+import firebase from 'firebase'
+
 export default {
   name: 'HelloWorld',
-  data () {
+  data () {    // 画面で使用する変数を定義する場所
     return {
-      newTask:'',
-      todos : []
+      newTask: '',
+      todos: [],
+      db: firebase.firestore()
     }
   },
-  watch: {
-    todos: {
-      handler: function() {
-        localStorage.setItem('todos',JSON.stringify(this.todos))
-      },
-      deep: true
-    }
+  created: function () {
+    // this.todos = JSON.parse(localStorage.getItem("todos")) || [];
+    const me = this
+    const ref = this.db.collection('todos')
+    ref.get().then(querySnapshot => {
+      this.loading = false
+      querySnapshot.forEach(doc => {
+        const task = doc.data()
+        task.id = doc.id
+        me.todos.push(task)
+      })
+    })
   },
-  created: function() {
-    this.todos = JSON.parse(localStorage.getItem("todos")) || [];
-  },
-  methods:{
-    addTask: function(){
-      this.todos.push({
+  methods: {
+    addTask: function () {
+      const me = this
+      const task = {
+        id: '',
         name: this.newTask,
         isDone: false
+      }
+      this.db
+        .collection('todos')
+        .add(task)
+        .then(function (docref) {
+          task.id = docref.id
+          me.todos.push(task)
+        })
+      this.newTask = ''
+    },
+    done: function(todo){ 
+      this.db
+        .collection("todos")
+        .doc(todo.id)
+        .set(todo)
+    },
+    deleteTask: function (key) {
+      this.todos.forEach((todo, index) => {
+        if (todo.id == key) {
+          this.todos.splice(index, 1)
+        }
       })
-      this.newTask=''
+      this.db
+        .collection('todos')
+        .doc(key)
+        .delete()
     },
-    deleteTask: function(index){
-      this.todos.splice(index,1)
-    },
-    deleteEndTask:function(){
-      this.todos = this.remainingTask;
+    deleteEndTask: function () {
+      const doneTasks = this.todos.filter(todo => {
+        return todo.isDone
+      })
+      
+      this.todos = this.remainingTask
+
+      for (let task of doneTasks) {
+        this.db
+          .collection('todos')
+          .doc(task.id)
+          .delete()
+      }
     }
   },
-  computed:{
-    remainingTask: function(){
-      return this.todos.filter(function(todo){
+  computed: {
+    remainingTask: function () {
+      return this.todos.filter(function (todo) {
         return !todo.isDone
       })
     }
@@ -73,15 +112,15 @@ h1 > button {
   float: right;
 }
 
-.xButton{
+.xButton {
   cursor: pointer;
   font-size: 12px;
-  color: red
+  color: red;
 }
 
-li > span.done{
+li > span.done {
   text-decoration: line-through;
-  color:#bbb
+  color: #bbb;
 }
 
 .info {
