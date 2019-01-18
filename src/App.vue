@@ -1,17 +1,17 @@
 <template>
   <div id="app">
-    <Header /> <!-- 追加 --> 
+    <Header /> 
     <router-view/>
   </div>
 </template>
 
 <script>
-import Header from '@/components/Header'  // コンポーネントをimportして
+import Header from '@/components/Header'
 
 export default {
   name: 'App',
   components:{
-    Header // つかうことを宣言する
+    Header
   }
 }
 </script>
