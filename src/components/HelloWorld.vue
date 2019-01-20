@@ -1,7 +1,8 @@
 <template>
-  <main v-if='$store.state.loginStatus'>
+  <main v-if="$store.state.loginStatus" class="container">
     <h1>
-      <button @click="deleteEndTask">完了タスクの削除</button>My Todo Task<span class='info'>({{remainingTask.length}}/{{todos.length}})</span></h1>
+      My Todo Task<span class='info'>({{remainingTask.length}}/{{todos.length}})</span>
+      <b-button size="sm" variant="secondary" @click="deleteEndTask">完了タスクの削除</b-button></h1>
     <ul>
       <li v-for='todo in todos' :key='todo.id'>
         <input type='checkbox' v-model='todo.isDone' @click='done(todo)' >
@@ -10,11 +11,12 @@
         </li>
     </ul>
     <form @submit.prevent='addTask'>
-      <input type='text' v-model='newTask'>
-      <input type='submit' value='追加' >
+      <input type='text' v-model='newTask' placeholder="タスクを入力" >
+      <b-button type='submit' variant="primary" style='margin:4px'>追加</b-button>
     </form>
   </main>
 </template>
+
 
 <script>
 import firebase from 'firebase'
@@ -103,13 +105,15 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 h1 {
-  font-size: 16px;
   border-bottom: 1px solid #ddd;
   padding: 16px 0;
 }
-
 h1 > button {
   float: right;
+}
+
+li {
+    padding: 4px;
 }
 
 .xButton {
@@ -127,4 +131,5 @@ li > span.done {
   color: #bbb;
   font-size: 12px;
 }
+
 </style>
