@@ -2,11 +2,13 @@
   <main v-if="$store.state.loginStatus" class="container">
     <h1>
       My Todo Task<span class='info'>({{remainingTask.length}}/{{todos.length}})</span>
+      <span class='info' style='cursor:pointer' @click='checkAll()' v-if='!isAllChecked()'>すべてチェック/はずす</span>
+      <span class='info' style='cursor:pointer' @click='unCheckAll()' v-if='isAllChecked()'>すべてチェック/はずす</span>
       <b-button size="sm" variant="secondary" @click="deleteEndTask">完了タスクの削除</b-button></h1>
     <ul>
       <li v-for='todo in todos' :key='todo.id'>
-        <input type='checkbox' v-model='todo.isDone' @click='done(todo)' >
-        <span v-bind:class='{done: todo.isDone}'>{{todo.name}}</span>
+        <input type='checkbox' v-model='todo.isDone' @click='toggle(todo.id)' >
+        <span v-bind:class='{done: todo.isDone}'>{{todo}}</span>
         <span @click='deleteTask(todo.id)' class='xButton'>[x]</span>
         </li>
     </ul>
@@ -34,62 +36,124 @@ export default {
     // this.todos = JSON.parse(localStorage.getItem("todos")) || [];
     const me = this
     const ref = this.db.collection('todos')
-    ref.get().then(querySnapshot => {
-      this.loading = false
-      querySnapshot.forEach(doc => {
-        const task = doc.data()
-        task.id = doc.id
-        me.todos.push(task)
+    // 変更データを取得するメソッドを使用する。
+    // ココは、refのデータに変更があった場合コールバックされる
+    // querySnapshot.docChanges() に変更データが入ってる
+    ref.onSnapshot(querySnapshot => {
+      querySnapshot.docChanges().forEach(change => {
+        // 変更されたレコード
+        const task = change.doc.data()
+        console.log("task: "+ JSON.stringify(task)+" "+change.type)
+       
+        // 変更されたレコードの配列上のインデックス番号を特定する
+        // 配列のfindIndexで、todos配列のうち todo.id プロパティがchange.doc.idとおなじヤツのIndex番号を取得
+        const index = this.todos.findIndex(todo => todo.id === change.doc.id);
+        console.log("index: " + index)
+ 
+        // change.typeで処理を切り替え
+        switch (change.type) {
+          case "added":
+            // added は、初期表示時と、データをaddしたとき
+            // idが""でないときは初期表示なので単純push
+            if (task.id !== "") {
+              me.todos.push(task)
+            }else{
+              // なにもしない(addTaskメソッドでpush済み)
+            }
+            break
+
+          case "modified":
+            // modifiedは修正。修正が飛んでくるけどindexがないのは他画面での修正かもなのでpush
+            if (index === -1) {
+              // 修正(modified)で見つからないと言うことは、別画面での追加。
+              this.todos.push(task)
+            } else {
+              // indexが見つかるときは、該当行を更新すればいいが、
+              // me.todos[index] = change.doc.data()
+              // これはVue.jsがViewを更新してくれない
+              // me.$forceUpdate() // これかもしくは$setをつかう
+              this.$set(me.todos, index, task)
+            }
+            break
+          case "removed":
+            // removedは削除
+            this.todos.splice(index, 1)
+            break
+          default:
+            break
+        }
       })
     })
   },
   methods: {
     addTask: function () {
-      const me = this
       const task = {
         id: '',
         name: this.newTask,
         isDone: false
       }
-      this.db
-        .collection('todos')
-        .add(task)
-        .then(function (docref) {
+      this.todos.push(task)
+      const ref = this.db.collection('todos')
+      ref.add(task).then( docref => {
           task.id = docref.id
-          me.todos.push(task)
+          ref.doc(docref.id).set(task) // idを入れて再度更新
         })
       this.newTask = ''
     },
-    done: function(todo){ 
-      this.db
-        .collection("todos")
-        .doc(todo.id)
-        .set(todo)
-    },
-    deleteTask: function (key) {
-      this.todos.forEach((todo, index) => {
-        if (todo.id == key) {
-          this.todos.splice(index, 1)
-        }
+    toggle: function(key){
+      let target ={}
+      const ref = this.db.collection('todos').doc(key)
+      ref.get().then(docref=>{
+        target = docref.data()
+        target.isDone = !target.isDone
+        ref.set(target)
       })
+    },
+
+    deleteTask: function (key) {
       this.db
         .collection('todos')
         .doc(key)
         .delete()
     },
     deleteEndTask: function () {
-      const doneTasks = this.todos.filter(todo => {
-        return todo.isDone
-      })
-      
-      this.todos = this.remainingTask
+      const doneTasks = this.todos.filter(todo => todo.isDone)
 
-      for (let task of doneTasks) {
-        this.db
-          .collection('todos')
-          .doc(task.id)
-          .delete()
+      // this.todos = this.remainingTask
+
+      const ref = this.db.collection('todos')
+      doneTasks.forEach(doneTask=> ref.doc(doneTask.id).delete())
+    },
+
+    // 以下はすべてチェック・はずす のためのロジックで、ま、不要っちゃ不要
+    updateCheck: function(key,isDone){
+      let target ={}
+      const ref = this.db.collection('todos').doc(key)
+      ref.get().then(docref=>{
+        target = docref.data()
+        target.isDone = isDone
+        ref.set(target)
+      })
+    },
+    check: function(key){
+      this.updateCheck(key,true)
+    },
+    unCheck: function(key){
+      this.updateCheck(key,false)
+    },
+    checkAll: function() {
+      const ref = this.db.collection("todos")
+      this.todos.forEach(todo => this.check(todo.id))
+    },
+    unCheckAll: function() {
+      const ref = this.db.collection("todos")
+      this.todos.forEach(todo => this.unCheck(todo.id))
+    },
+    isAllChecked: function(){
+      if(this.todos.findIndex(todo=> !todo.isDone) ===-1){
+        return true
       }
+      return false
     }
   },
   computed: {
