@@ -8,7 +8,7 @@
     <ul>
       <li v-for='todo in todos' :key='todo.id'>
         <input type='checkbox' v-model='todo.isDone' @click='toggle(todo.id)' >
-        <span v-bind:class='{done: todo.isDone}'>{{todo}}</span>
+        <span v-bind:class='{done: todo.isDone}'>{{todo.name}}</span>
         <span @click='deleteTask(todo.id)' class='xButton'>[x]</span>
         </li>
     </ul>
@@ -150,9 +150,11 @@ export default {
       this.todos.forEach(todo => this.unCheck(todo.id))
     },
     isAllChecked: function(){
-      if(this.todos.findIndex(todo=> !todo.isDone) ===-1){
+      if(this.todos.findIndex(todo=> !todo.isDone) ===-1){ 
+        // 完了していないのが一つもなければ、true
         return true
       }
+      // 完了していないのが一つでもあれば false
       return false
     }
   },
