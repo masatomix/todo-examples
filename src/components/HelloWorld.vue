@@ -33,8 +33,6 @@ export default {
     }
   },
   created: function () {
-    // this.todos = JSON.parse(localStorage.getItem("todos")) || [];
-    const me = this
     const ref = this.db.collection('todos')
     // 変更データを取得するメソッドを使用する。
     // ココは、refのデータに変更があった場合コールバックされる
@@ -56,7 +54,7 @@ export default {
             // added は、初期表示時と、データをaddしたとき
             // idが""でないときは初期表示なので単純push
             if (task.id !== "") {
-              me.todos.push(task)
+              this.todos.push(task)
             }else{
               // なにもしない(addTaskメソッドでpush済み)
             }
@@ -69,10 +67,10 @@ export default {
               this.todos.push(task)
             } else {
               // indexが見つかるときは、該当行を更新すればいいが、
-              // me.todos[index] = change.doc.data()
+              // this.todos[index] = change.doc.data()
               // これはVue.jsがViewを更新してくれない
-              // me.$forceUpdate() // これかもしくは$setをつかう
-              this.$set(me.todos, index, task)
+              // this.$forceUpdate() // これかもしくは$setをつかう
+              this.$set(this.todos, index, task)
             }
             break
           case "removed":
