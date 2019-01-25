@@ -1,35 +1,5 @@
 <template>
   <b-container>
-    <form class="form-signin" @submit="onSubmit">
-      <h1 class="h3 mb-3 font-weight-normal">サインイン</h1>
-      <label for="inputUserName" class="sr-only">e-mail</label>
-      <input
-        type="email"
-        id="inputUserName"
-        class="form-control"
-        placeholder="e-mail"
-        required
-        autofocus
-        v-model="userInfo.userid"
-      >
-      <label for="inputPassword" class="sr-only">Password</label>
-      <input
-        type="password"
-        id="inputPassword"
-        class="form-control"
-        placeholder="Password"
-        required
-        v-model="userInfo.password"
-      >
-      <div class="checkbox mb-3">
-        <label>
-          <input type="checkbox" value="remember-me" v-model="userInfo.rememberme"> Remember me
-        </label>
-      </div>
-      <button class="btn btn-lg btn-primary btn-block" >Sign in</button>
-    </form>
-    
-
     <div class="form-signin">
       <button type="button" class="google-button" @click='loginWithGoogle'>
         <span class="google-button__icon">
@@ -38,23 +8,6 @@
         <span class="google-button__text">Sign in with Google</span>
       </button>
     </div>
-
-    <div class="form-signin">
-    <label for="inputDisplayName" class="sr-only">DisplayName</label>
-      <input
-        type="text"
-        id="inputDisplayName"
-        class="form-control"
-        placeholder="Display Name"
-        v-model="userInfo.displayName"
-      >
-      <button class="btn btn-lg btn-primary btn-block" @click='signup'>Sign up</button>
-    </div>
-
-
-
-
-
   </b-container>
 </template>
 
@@ -64,87 +17,12 @@ import firebase from 'firebase'
 
 export default {
   name: 'Login',
-  data () {
-    return {
-      userInfo: {
-        userid: '',
-        password: '',
-        displayName: '',
-        rememberme: false
-      }
-    }
-  },
-  created: function () {
-    this.userInfo = JSON.parse(localStorage.getItem('userInfo')) || {}
-  },
   methods: {
-    onSubmit (evt) {
-      evt.preventDefault()
-      // const me = this
-      firebase
-        .auth()
-        .signInWithEmailAndPassword(this.userInfo.userid, this.userInfo.password)
-        .then( (result) => {
-          this.$store.commit('user', result.user)
-          this.$store.commit('loginStatus', true)
-
-          this.userInfo.password=''
-          if (this.userInfo.rememberme) {
-            localStorage.setItem('userInfo', JSON.stringify(this.userInfo))
-          } else {
-            localStorage.removeItem('userInfo')
-          }
-          this.$router.push(
-            this.$route.query.redirect ? this.$route.query.redirect : '/'
-          )
-        })
-        .catch(function (error) {
-          const errorCode = error.code
-          const errorMessage = error.message
-          alert(errorMessage)
-        })
-    },
-    
-    signup() {
-      firebase
-        .auth()
-        .createUserWithEmailAndPassword(
-          this.userInfo.userid,
-          this.userInfo.password
-        )
-        .then(result => {
-          result.user
-            .updateProfile({
-              displayName: this.userInfo.displayName
-            })
-            .then(() => {
-              this.$store.commit("user", firebase.auth().currentUser);
-              this.$store.commit("loginStatus", true);
-
-              this.userInfo.password = "";
-              if (this.userInfo.rememberme) {
-                localStorage.setItem("userInfo", JSON.stringify(this.userInfo));
-              } else {
-                localStorage.removeItem("userInfo");
-              }
-              this.$router.push(
-                this.$route.query.redirect ? this.$route.query.redirect : "/"
-              );
-            });
-        })
-        .catch(function(error) {
-          // Handle Errors here.
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          alert(errorMessage);
-        });
-    },
     loginWithGoogle(){
       const provider = new firebase.auth.GoogleAuthProvider();
       firebase
         .auth()
         .signInWithPopup(provider).then((result)=> {
-
           this.$store.commit('user', result.user)
           this.$store.commit('loginStatus', true)
           this.$router.push(

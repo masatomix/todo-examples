@@ -14,10 +14,7 @@ export default new Router({
     },
     {
       path: '/login',
-      component: Login,
-      meta: {
-        isPublic: true
-      }
+      component: Login
     }
   ]
 })

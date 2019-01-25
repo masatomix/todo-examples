@@ -19,7 +19,6 @@
 
 <script>
 import firebase from 'firebase'
-import store from '@/store'
 
 export default {
   name: 'Header',
@@ -33,18 +32,7 @@ export default {
   },
   methods: {
     logout () {
-      firebase
-        .auth()
-        .signOut()
-        .then(() => {
-          this.$router.push('/')
-          window.location.reload()
-        })
-        .catch(function (error) {
-          const errorCode = error.code
-          const errorMessage = error.message
-          alert(errorMessage)
-        })
+      firebase.auth().signOut()
     }
   }
 }
