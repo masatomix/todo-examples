@@ -21,9 +21,6 @@ firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION)
 Vue.config.productionTip = false
 
 firebase.auth().onAuthStateChanged(function (user) {
-  // alert('state changed')
-  // alert(JSON.stringify(firebase.auth().currentUser))
-  // alert(JSON.stringify(user))
   if (user) {
     console.log(JSON.stringify(user))
     // User is signed in.
@@ -37,9 +34,6 @@ firebase.auth().onAuthStateChanged(function (user) {
 
 router.beforeEach((to, from, next) => {
   const currentUser = store.state.user
-  // alert('画面遷移')
-  // alert(JSON.stringify(firebase.auth().currentUser))
-  // alert(JSON.stringify(currentUser))
   if (currentUser.uid) {
     if (to.path == '/login') {
       firebase.auth().signOut().then(() => next())
