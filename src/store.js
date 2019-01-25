@@ -11,12 +11,12 @@ export default new Vuex.Store({
     loginStatus: false
   },
   mutations: {
-    updateUser(state, user) {
-      state.user = user;
+    user (state, user) {
+      state.user = user
     },
-    updateLoginStatus(state, loginStatus) {
-      state.loginStatus = loginStatus;
+    loginStatus (state, loginStatus) {
+      state.loginStatus = loginStatus
     }
   },
-  plugins: [createPersistedState()]
-});
+  plugins: [createPersistedState({storage: window.sessionStorage, key: 'vuex-todo-examples'})]
+})
