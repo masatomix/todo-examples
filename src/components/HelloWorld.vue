@@ -19,13 +19,12 @@
   </main>
 </template>
 
-
 <script>
 import firebase from 'firebase'
 
 export default {
   name: 'HelloWorld',
-  data () {    // 画面で使用する変数を定義する場所
+  data () { // 画面で使用する変数を定義する場所
     return {
       newTask: '',
       todos: [],
@@ -41,26 +40,26 @@ export default {
       querySnapshot.docChanges().forEach(change => {
         // 変更されたレコード
         const task = change.doc.data()
-        console.log("task: "+ JSON.stringify(task)+" "+change.type)
-       
+        console.log('task: ' + JSON.stringify(task) + ' ' + change.type)
+
         // 変更されたレコードの配列上のインデックス番号を特定する
         // 配列のfindIndexで、todos配列のうち todo.id プロパティがchange.doc.idとおなじヤツのIndex番号を取得
-        const index = this.todos.findIndex(todo => todo.id === change.doc.id);
-        console.log("index: " + index)
- 
+        const index = this.todos.findIndex(todo => todo.id === change.doc.id)
+        console.log('index: ' + index)
+
         // change.typeで処理を切り替え
         switch (change.type) {
-          case "added":
+          case 'added':
             // added は、初期表示時と、データをaddしたとき
             // idが""でないときは初期表示なので単純push
-            if (task.id !== "") {
+            if (task.id !== '') {
               this.todos.push(task)
-            }else{
+            } else {
               // なにもしない(addTaskメソッドでpush済み)
             }
             break
 
-          case "modified":
+          case 'modified':
             // modifiedは修正。修正が飛んでくるけどindexがないのは他画面での修正かもなのでpush
             if (index === -1) {
               // 修正(modified)で見つからないと言うことは、別画面での追加。
@@ -73,7 +72,7 @@ export default {
               this.$set(this.todos, index, task)
             }
             break
-          case "removed":
+          case 'removed':
             // removedは削除
             this.todos.splice(index, 1)
             break
@@ -92,16 +91,16 @@ export default {
       }
       this.todos.push(task)
       const ref = this.db.collection('todos')
-      ref.add(task).then( docref => {
-          task.id = docref.id
-          ref.doc(docref.id).set(task) // idを入れて再度更新
-        })
+      ref.add(task).then(docref => {
+        task.id = docref.id
+        ref.doc(docref.id).set(task) // idを入れて再度更新
+      })
       this.newTask = ''
     },
-    toggle: function(key){
-      let target ={}
+    toggle: function (key) {
+      let target = {}
       const ref = this.db.collection('todos').doc(key)
-      ref.get().then(docref=>{
+      ref.get().then(docref => {
         target = docref.data()
         target.isDone = !target.isDone
         ref.set(target)
@@ -120,35 +119,35 @@ export default {
       // this.todos = this.remainingTask
 
       const ref = this.db.collection('todos')
-      doneTasks.forEach(doneTask=> ref.doc(doneTask.id).delete())
+      doneTasks.forEach(doneTask => ref.doc(doneTask.id).delete())
     },
 
     // 以下はすべてチェック・はずす のためのロジックで、ま、不要っちゃ不要
-    updateCheck: function(key,isDone){
-      let target ={}
+    updateCheck: function (key, isDone) {
+      let target = {}
       const ref = this.db.collection('todos').doc(key)
-      ref.get().then(docref=>{
+      ref.get().then(docref => {
         target = docref.data()
         target.isDone = isDone
         ref.set(target)
       })
     },
-    check: function(key){
-      this.updateCheck(key,true)
+    check: function (key) {
+      this.updateCheck(key, true)
     },
-    unCheck: function(key){
-      this.updateCheck(key,false)
+    unCheck: function (key) {
+      this.updateCheck(key, false)
     },
-    checkAll: function() {
-      const ref = this.db.collection("todos")
+    checkAll: function () {
+      const ref = this.db.collection('todos')
       this.todos.forEach(todo => this.check(todo.id))
     },
-    unCheckAll: function() {
-      const ref = this.db.collection("todos")
+    unCheckAll: function () {
+      const ref = this.db.collection('todos')
       this.todos.forEach(todo => this.unCheck(todo.id))
     },
-    isAllChecked: function(){
-      if(this.todos.findIndex(todo=> !todo.isDone) ===-1){ 
+    isAllChecked: function () {
+      if (this.todos.findIndex(todo => !todo.isDone) === -1) {
         // 完了していないのが一つもなければ、true
         return true
       }

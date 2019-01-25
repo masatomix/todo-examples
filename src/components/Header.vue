@@ -4,14 +4,13 @@
   <b-navbar-brand href="#">ToDo管理</b-navbar-brand>
   <b-collapse is-nav id="nav_collapse">
     <!-- Right aligned nav items -->
-    <b-navbar-nav class="ml-auto">
+    <b-navbar-nav class="ml-auto" v-if='loginStatus' >
       <b-nav-item-dropdown right>
         <!-- Using button-content slot -->
         <template slot="button-content">
-          <em><span v-if='!loginStatus' >未ログイン</span><span v-if='loginStatus' >{{user.displayName}}</span></em>
+          <em><span>{{user.displayName}}</span></em>
         </template>
-        <b-dropdown-item @click="auth.login()" v-if='!loginStatus' >Signin</b-dropdown-item>
-        <b-dropdown-item @click="auth.logout()" v-if='loginStatus' >{{user.displayName}}さんを Signout</b-dropdown-item>
+        <b-dropdown-item @click="logout()" >{{user.displayName}}さんを Signout</b-dropdown-item>
       </b-nav-item-dropdown>
     </b-navbar-nav>
   </b-collapse>
@@ -19,21 +18,33 @@
 </template>
 
 <script>
-import Auth from '@/Auth'
+import firebase from 'firebase'
+import store from '@/store'
 
 export default {
   name: 'Header',
-  data () {
-    return {
-      auth: Auth
-    }
-  },
-  computed:{
-    loginStatus(){
+  computed: {
+    loginStatus () {
       return this.$store.state.loginStatus
     },
-    user(){
+    user () {
       return this.$store.state.user
+    }
+  },
+  methods: {
+    logout () {
+      firebase
+        .auth()
+        .signOut()
+        .then(() => {
+          this.$router.push('/')
+          window.location.reload()
+        })
+        .catch(function (error) {
+          const errorCode = error.code
+          const errorMessage = error.message
+          alert(errorMessage)
+        })
     }
   }
 }
