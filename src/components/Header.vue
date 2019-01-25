@@ -23,11 +23,11 @@ import store from '@/store'
 
 export default {
   name: 'Header',
-  computed:{
-    loginStatus(){
+  computed: {
+    loginStatus () {
       return this.$store.state.loginStatus
     },
-    user(){
+    user () {
       return this.$store.state.user
     }
   },
