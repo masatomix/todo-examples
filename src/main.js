@@ -32,6 +32,32 @@ firebase.auth().onAuthStateChanged(function (user) {
   }
 })
 
+router.beforeEach((to, from, next) => {
+  const currentUser = store.state.user
+  if (currentUser.uid) {
+    if (to.path == '/login') {
+      firebase.auth().signOut().then(() => next())
+    }
+  }
+
+  if (to.matched.some(record => record.meta.isPublic)) {
+    // alert('isPublic = true '+ to.path)
+    next()
+  } else {
+    // alert('isPublic = false '+ to.path)
+    if (currentUser.uid) {
+      next()
+    } else {
+      next({
+        path: '/login',
+        query: {
+          redirect: to.path
+        }
+      })
+    }
+  }
+})
+
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

@@ -32,7 +32,18 @@ export default {
   },
   methods: {
     logout () {
-      firebase.auth().signOut()
+      firebase
+        .auth()
+        .signOut()
+        .then(() => {
+          this.$router.push('/')
+          window.location.reload()
+        })
+        .catch(function (error) {
+          const errorCode = error.code
+          const errorMessage = error.message
+          alert(errorMessage)
+        })
     }
   }
 }
