@@ -2,30 +2,20 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
 import App from './App'
-
 import router from './router'
-import store from '@/store'
-import firebase from 'firebase'
-import firebaseConfig from '@/firebaseConfig'
-
-import BootstrapVue from "bootstrap-vue"
-import "bootstrap/dist/css/bootstrap.min.css"
-import "bootstrap-vue/dist/bootstrap-vue.css"
-Vue.use(BootstrapVue)
+import firebase from 'firebase'  // 追加
+import firebaseConfig from '@/firebaseConfig' // 追加
 
 
 // if (!firebase.apps.length) {
-firebase.initializeApp(firebaseConfig)
+firebase.initializeApp(firebaseConfig) // 初期化処理追加
 // }
-firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
   router,
-  store,
   components: { App },
   template: '<App/>'
 })

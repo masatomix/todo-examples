@@ -1,10 +1,10 @@
 <template>
-  <main v-if="$store.state.loginStatus" class="container">
+  <main class="container">
     <h1>
       My Todo Task<span class='info'>({{remainingTask.length}}/{{todos.length}})</span>
       <span class='info' style='cursor:pointer' @click='checkAll()' v-if='!isAllChecked()'>すべてチェック/はずす</span>
       <span class='info' style='cursor:pointer' @click='unCheckAll()' v-if='isAllChecked()'>すべてチェック/はずす</span>
-      <b-button size="sm" variant="secondary" @click="deleteEndTask">完了タスクの削除</b-button></h1>
+      <button size="sm" variant="secondary" @click="deleteEndTask">完了タスクの削除</button></h1>
     <ul>
       <li v-for='todo in todos' :key='todo.id'>
         <input type='checkbox' v-model='todo.isDone' @click='toggle(todo.id)' >
@@ -14,7 +14,7 @@
     </ul>
     <form @submit.prevent='addTask'>
       <input type='text' v-model='newTask' placeholder="タスクを入力" >
-      <b-button type='submit' variant="primary" style='margin:4px'>追加</b-button>
+      <button type='submit' variant="primary" style='margin:4px'>追加</button>
     </form>
   </main>
 </template>
@@ -42,12 +42,10 @@ export default {
         // 変更されたレコード
         const task = change.doc.data()
         console.log("task: "+ JSON.stringify(task)+" "+change.type)
-       
         // 変更されたレコードの配列上のインデックス番号を特定する
         // 配列のfindIndexで、todos配列のうち todo.id プロパティがchange.doc.idとおなじヤツのIndex番号を取得
         const index = this.todos.findIndex(todo => todo.id === change.doc.id);
         console.log("index: " + index)
- 
         // change.typeで処理を切り替え
         switch (change.type) {
           case "added":
