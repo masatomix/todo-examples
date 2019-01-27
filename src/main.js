@@ -25,11 +25,11 @@ firebase.auth().onAuthStateChanged(function (user) {
   if (user) {
     console.log(JSON.stringify(user))
     // User is signed in.
-    store.commit('user', user)
-    store.commit('loginStatus', true)
+    store.commit(constants.mutations.user, user)
+    store.commit(constants.mutations.loginStatus, true)
   } else {
-    store.commit('user', {})
-    store.commit('loginStatus', false)
+    store.commit(constants.mutations.user, {})
+    store.commit(constants.mutations.loginStatus, false)
   }
 })
 

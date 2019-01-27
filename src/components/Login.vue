@@ -78,8 +78,8 @@ export default {
         .auth()
         .signInWithEmailAndPassword(this.userInfo.userid, this.userInfo.password)
         .then( (result) => {
-          this.$store.commit('user', result.user)
-          this.$store.commit('loginStatus', true)
+          this.$store.commit(constants.mutations.user, result.user)
+          this.$store.commit(constants.mutations.loginStatus, true)
 
           this.userInfo.password=''
           if (this.userInfo.rememberme) {
@@ -107,8 +107,8 @@ export default {
         .auth()
         .signInWithPopup(provider).then((result)=> {
 
-          this.$store.commit('user', result.user)
-          this.$store.commit('loginStatus', true)
+          this.$store.commit(constants.mutations.user, result.user)
+          this.$store.commit(constants.mutations.loginStatus, true)
           this.$router.push(
             this.$route.query.redirect ? this.$route.query.redirect : constants.path.TOP
           )

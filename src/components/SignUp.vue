@@ -1,6 +1,6 @@
 <template>
   <b-container>
-    <form class="form-signin" @submit="signup">
+    <form class="form-signin" @submit.prevent="signup">
       <h1 class="h3 mb-3 font-weight-normal">サインアップ</h1>
       <label for="inputUserName" class="sr-only">e-mail</label>
       <input
@@ -30,7 +30,7 @@
         v-model="userInfo.displayName"
         required
       >
-      <button class="btn btn-lg btn-primary btn-block" @click='signup'>Sign up</button>
+      <button class="btn btn-lg btn-primary btn-block" >Sign up</button>
     </form>
     <div class="form-signin">
       <router-link :to='loginPath' >ログイン画面</router-link>
@@ -67,20 +67,15 @@ export default {
           this.userInfo.password
         )
         .then(result => {
+          this.$store.commit(constants.mutations.user, result.user);
+          this.$store.commit(constants.mutations.loginStatus, true);
           result.user
             .updateProfile({
               displayName: this.userInfo.displayName
             })
             .then(() => {
-              this.$store.commit("user", firebase.auth().currentUser);
-              this.$store.commit("loginStatus", true);
-
               this.userInfo.password = "";
-              if (this.userInfo.rememberme) {
-                localStorage.setItem("userInfo", JSON.stringify(this.userInfo));
-              } else {
-                localStorage.removeItem("userInfo");
-              }
+              localStorage.removeItem("userInfo");
               this.$router.push(
                 this.$route.query.redirect ? this.$route.query.redirect : constants.path.TOP
               );
