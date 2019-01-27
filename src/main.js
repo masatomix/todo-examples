@@ -7,6 +7,7 @@ import router from './router'
 import store from '@/store'
 import firebase from 'firebase'
 import firebaseConfig from '@/firebaseConfig'
+import constants from '@/constants'
 
 import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.min.css'
@@ -24,18 +25,18 @@ firebase.auth().onAuthStateChanged(function (user) {
   if (user) {
     console.log(JSON.stringify(user))
     // User is signed in.
-    store.commit('user', user)
-    store.commit('loginStatus', true)
+    store.commit(constants.mutations.user, user)
+    store.commit(constants.mutations.loginStatus, true)
   } else {
-    store.commit('user', {})
-    store.commit('loginStatus', false)
+    store.commit(constants.mutations.user, {})
+    store.commit(constants.mutations.loginStatus, false)
   }
 })
 
 router.beforeEach((to, from, next) => {
   const currentUser = store.state.user
   if (currentUser.uid) {
-    if (to.path == '/login') {
+    if (to.path === constants.path.LOGIN) {
       firebase.auth().signOut().then(() => next())
     }
   }
@@ -49,7 +50,7 @@ router.beforeEach((to, from, next) => {
       next()
     } else {
       next({
-        path: '/login',
+        path: constants.path.LOGIN,
         query: {
           redirect: to.path
         }

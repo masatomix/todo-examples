@@ -6,11 +6,13 @@
       <span class='info' style='cursor:pointer' @click='unCheckAll()' v-if='isAllChecked()'>すべてチェック/はずす</span>
       <b-button size="sm" variant="secondary" @click="deleteEndTask">完了タスクの削除</b-button></h1>
     <ul>
+      <transition-group name="list" tag="p">
       <li v-for='todo in todos' :key='todo.id'>
         <input type='checkbox' v-model='todo.isDone' @click='toggle(todo.id)' >
         <span v-bind:class='{done: todo.isDone}'>{{todo.name}}</span>
         <span @click='deleteTask(todo.id)' class='xButton'>[x]</span>
         </li>
+      </transition-group>
     </ul>
     <form @submit.prevent='addTask'>
       <input type='text' v-model='newTask' placeholder="タスクを入力" >
@@ -89,11 +91,11 @@ export default {
         name: this.newTask,
         isDone: false
       }
-      this.todos.push(task)
       const ref = this.db.collection('todos')
       ref.add(task).then(docref => {
         task.id = docref.id
         ref.doc(docref.id).set(task) // idを入れて再度更新
+        this.todos.push(task)
       })
       this.newTask = ''
     },
@@ -124,10 +126,9 @@ export default {
 
     // 以下はすべてチェック・はずす のためのロジックで、ま、不要っちゃ不要
     updateCheck: function (key, isDone) {
-      let target = {}
       const ref = this.db.collection('todos').doc(key)
       ref.get().then(docref => {
-        target = docref.data()
+        let target = docref.data()
         target.isDone = isDone
         ref.set(target)
       })
@@ -139,11 +140,9 @@ export default {
       this.updateCheck(key, false)
     },
     checkAll: function () {
-      const ref = this.db.collection('todos')
       this.todos.forEach(todo => this.check(todo.id))
     },
     unCheckAll: function () {
-      const ref = this.db.collection('todos')
       this.todos.forEach(todo => this.unCheck(todo.id))
     },
     isAllChecked: function () {
@@ -193,6 +192,18 @@ li > span.done {
 .info {
   color: #bbb;
   font-size: 12px;
+}
+
+.list-item {
+  display: inline-block;
+  margin-right: 10px;
+}
+.list-enter-active, .list-leave-active {
+  transition: all 1s;
+}
+.list-enter, .list-leave-to /* .list-leave-active for below version 2.1.8 */ {
+  opacity: 0;
+  transform: translateX(30px);
 }
 
 </style>
