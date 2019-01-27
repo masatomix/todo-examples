@@ -154,7 +154,9 @@ export default {
         .catch(function (error) {
           const errorCode = error.code
           const errorMessage = error.message
-          alert(errorMessage)
+          // alert(errorMessage) 
+          // ↑二回ダイアログを出したりとか、ポップアップ閉じたりとか、結構な頻度で発生するエラーだった。コレ。
+          console.log(errorCode,errorMessage)
         })
     }
   }
