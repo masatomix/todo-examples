@@ -7,13 +7,12 @@ import router from './router'
 import store from '@/store'
 import firebase from 'firebase'
 import firebaseConfig from '@/firebaseConfig'
+import constants from '@/constants'
 
 import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 Vue.use(BootstrapVue)
-
-import constants from '@/constants'
 
 // if (!firebase.apps.length) {
 firebase.initializeApp(firebaseConfig)
@@ -37,7 +36,7 @@ firebase.auth().onAuthStateChanged(function (user) {
 router.beforeEach((to, from, next) => {
   const currentUser = store.state.user
   if (currentUser.uid) {
-    if (to.path == constants.path.LOGIN) {
+    if (to.path === constants.path.LOGIN) {
       firebase.auth().signOut().then(() => next())
     }
   }

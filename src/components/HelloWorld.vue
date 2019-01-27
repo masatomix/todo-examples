@@ -124,10 +124,9 @@ export default {
 
     // 以下はすべてチェック・はずす のためのロジックで、ま、不要っちゃ不要
     updateCheck: function (key, isDone) {
-      let target = {}
       const ref = this.db.collection('todos').doc(key)
       ref.get().then(docref => {
-        target = docref.data()
+        let target = docref.data()
         target.isDone = isDone
         ref.set(target)
       })
@@ -139,11 +138,9 @@ export default {
       this.updateCheck(key, false)
     },
     checkAll: function () {
-      const ref = this.db.collection('todos')
       this.todos.forEach(todo => this.check(todo.id))
     },
     unCheckAll: function () {
-      const ref = this.db.collection('todos')
       this.todos.forEach(todo => this.unCheck(todo.id))
     },
     isAllChecked: function () {

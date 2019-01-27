@@ -32,7 +32,7 @@ export default {
     }
   },
   methods: {
-    gotoTop(){
+    gotoTop () {
       this.$router.push(constants.path.TOP)
     },
     logout () {
@@ -46,7 +46,7 @@ export default {
         .catch(function (error) {
           const errorCode = error.code
           const errorMessage = error.message
-          alert(errorMessage)
+          alert(errorCode,errorMessage)
         })
     }
   }

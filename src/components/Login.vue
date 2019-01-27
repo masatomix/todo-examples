@@ -74,7 +74,6 @@ export default {
   methods: {
     onSubmit (evt) {
       evt.preventDefault()
-      // const me = this
       firebase
         .auth()
         .signInWithEmailAndPassword(this.userInfo.userid, this.userInfo.password)
@@ -95,7 +94,7 @@ export default {
         .catch(function (error) {
           const errorCode = error.code
           const errorMessage = error.message
-          alert(errorMessage)
+          alert(errorCode+'\n'+errorMessage)
         })
     },
     
@@ -103,7 +102,7 @@ export default {
       this.$router.push(constants.path.SIGN_UP)
     },
     loginWithGoogle(){
-      const provider = new firebase.auth.GoogleAuthProvider();
+      const provider = new firebase.auth.GoogleAuthProvider()
       firebase
         .auth()
         .signInWithPopup(provider).then((result)=> {
@@ -119,7 +118,7 @@ export default {
           const errorMessage = error.message
           // alert(errorMessage) 
           // ↑二回ダイアログを出したりとか、ポップアップ閉じたりとか、結構な頻度で発生するエラーだった。コレ。
-          console.log(errorCode,errorMessage)
+          console.log(errorCode, errorMessage)
         })
     }
   }
