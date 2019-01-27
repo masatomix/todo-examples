@@ -40,20 +40,8 @@
     </div>
 
     <div class="form-signin">
-    <label for="inputDisplayName" class="sr-only">DisplayName</label>
-      <input
-        type="text"
-        id="inputDisplayName"
-        class="form-control"
-        placeholder="Display Name"
-        v-model="userInfo.displayName"
-      >
-      <button class="btn btn-lg btn-primary btn-block" @click='signup'>Sign up</button>
+      <b-link v-bind:to='signupPath'>SignUpする</b-link>
     </div>
-
-
-
-
 
   </b-container>
 </template>
@@ -77,6 +65,11 @@ export default {
   },
   created: function () {
     this.userInfo = JSON.parse(localStorage.getItem('userInfo')) || {}
+  },
+  computed:{
+    signupPath() {
+      return { path: constants.path.SIGN_UP };
+    }
   },
   methods: {
     onSubmit (evt) {
@@ -106,39 +99,8 @@ export default {
         })
     },
     
-    signup() {
-      firebase
-        .auth()
-        .createUserWithEmailAndPassword(
-          this.userInfo.userid,
-          this.userInfo.password
-        )
-        .then(result => {
-          result.user
-            .updateProfile({
-              displayName: this.userInfo.displayName
-            })
-            .then(() => {
-              this.$store.commit("user", firebase.auth().currentUser);
-              this.$store.commit("loginStatus", true);
-
-              this.userInfo.password = "";
-              if (this.userInfo.rememberme) {
-                localStorage.setItem("userInfo", JSON.stringify(this.userInfo));
-              } else {
-                localStorage.removeItem("userInfo");
-              }
-              this.$router.push(
-                this.$route.query.redirect ? this.$route.query.redirect : "/"
-              );
-            });
-        })
-        .catch(function(error) {
-          // Handle Errors here.
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          alert(errorMessage);
-        });
+    gotoSignup() {
+      this.$router.push(constants.path.SIGN_UP)
     },
     loginWithGoogle(){
       const provider = new firebase.auth.GoogleAuthProvider();
