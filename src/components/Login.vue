@@ -28,7 +28,6 @@
       </div>
       <button class="btn btn-lg btn-primary btn-block" >Sign in</button>
     </form>
-    
 
     <div class="form-signin">
       <button type="button" class="google-button" @click='loginWithGoogle'>
@@ -66,9 +65,9 @@ export default {
   created: function () {
     this.userInfo = JSON.parse(localStorage.getItem('userInfo')) || {}
   },
-  computed:{
-    signupPath() {
-      return { path: constants.path.SIGN_UP };
+  computed: {
+    signupPath () {
+      return { path: constants.path.SIGN_UP }
     }
   },
   methods: {
@@ -77,11 +76,11 @@ export default {
       firebase
         .auth()
         .signInWithEmailAndPassword(this.userInfo.userid, this.userInfo.password)
-        .then( (result) => {
+        .then((result) => {
           this.$store.commit(constants.mutations.user, result.user)
           this.$store.commit(constants.mutations.loginStatus, true)
 
-          this.userInfo.password=''
+          this.userInfo.password = ''
           if (this.userInfo.rememberme) {
             localStorage.setItem('userInfo', JSON.stringify(this.userInfo))
           } else {
@@ -94,19 +93,18 @@ export default {
         .catch(function (error) {
           const errorCode = error.code
           const errorMessage = error.message
-          alert(errorCode+'\n'+errorMessage)
+          alert(errorCode + '\n' + errorMessage)
         })
     },
-    
-    gotoSignup() {
+
+    gotoSignup () {
       this.$router.push(constants.path.SIGN_UP)
     },
-    loginWithGoogle(){
+    loginWithGoogle () {
       const provider = new firebase.auth.GoogleAuthProvider()
       firebase
         .auth()
-        .signInWithPopup(provider).then((result)=> {
-
+        .signInWithPopup(provider).then((result) => {
           this.$store.commit(constants.mutations.user, result.user)
           this.$store.commit(constants.mutations.loginStatus, true)
           this.$router.push(
@@ -116,7 +114,7 @@ export default {
         .catch(function (error) {
           const errorCode = error.code
           const errorMessage = error.message
-          // alert(errorMessage) 
+          // alert(errorMessage)
           // ↑二回ダイアログを出したりとか、ポップアップ閉じたりとか、結構な頻度で発生するエラーだった。コレ。
           console.log(errorCode, errorMessage)
         })
@@ -227,7 +225,7 @@ body {
   box-shadow: 3px 6px 7px 3px rgba(0,0,0,0.1);
   transition-duration: 10ms;
 }
-    
+
 .google-button__icon {
   display: inline-block;
   vertical-align: middle;

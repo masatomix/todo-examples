@@ -53,13 +53,13 @@ export default {
       }
     }
   },
-  computed:{
-    loginPath() {
-      return { path: constants.path.LOGIN };
+  computed: {
+    loginPath () {
+      return { path: constants.path.LOGIN }
     }
   },
   methods: {
-    signup() {
+    signup () {
       firebase
         .auth()
         .createUserWithEmailAndPassword(
@@ -67,26 +67,26 @@ export default {
           this.userInfo.password
         )
         .then(result => {
-          this.$store.commit(constants.mutations.user, result.user);
-          this.$store.commit(constants.mutations.loginStatus, true);
+          this.$store.commit(constants.mutations.user, result.user)
+          this.$store.commit(constants.mutations.loginStatus, true)
           result.user
             .updateProfile({
               displayName: this.userInfo.displayName
             })
             .then(() => {
-              this.userInfo.password = "";
-              localStorage.removeItem("userInfo");
+              this.userInfo.password = ''
+              localStorage.removeItem('userInfo')
               this.$router.push(
                 this.$route.query.redirect ? this.$route.query.redirect : constants.path.TOP
-              );
-            });
+              )
+            })
         })
-        .catch(function(error) {
+        .catch(function (error) {
           // Handle Errors here.
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          alert(errorMessage);
-        });
+          const errorCode = error.code
+          const errorMessage = error.message
+          alert(errorCode + '\n' + errorMessage)
+        })
     }
   }
 }
@@ -194,7 +194,7 @@ body {
   box-shadow: 3px 6px 7px 3px rgba(0,0,0,0.1);
   transition-duration: 10ms;
 }
-    
+
 .google-button__icon {
   display: inline-block;
   vertical-align: middle;
