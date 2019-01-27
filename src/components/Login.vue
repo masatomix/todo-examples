@@ -60,6 +60,7 @@
 
 <script>
 import firebase from 'firebase'
+import constants from '@/constants'
 // import 'firebaseui/dist/firebaseui.css'
 
 export default {
@@ -95,7 +96,7 @@ export default {
             localStorage.removeItem('userInfo')
           }
           this.$router.push(
-            this.$route.query.redirect ? this.$route.query.redirect : '/'
+            this.$route.query.redirect ? this.$route.query.redirect : constants.path.TOP
           )
         })
         .catch(function (error) {
@@ -148,7 +149,7 @@ export default {
           this.$store.commit('user', result.user)
           this.$store.commit('loginStatus', true)
           this.$router.push(
-            this.$route.query.redirect ? this.$route.query.redirect : '/'
+            this.$route.query.redirect ? this.$route.query.redirect : constants.path.TOP
           )
         })
         .catch(function (error) {

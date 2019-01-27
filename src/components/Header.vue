@@ -19,6 +19,7 @@
 
 <script>
 import firebase from 'firebase'
+import constants from '@/constants'
 
 export default {
   name: 'Header',
@@ -36,7 +37,7 @@ export default {
         .auth()
         .signOut()
         .then(() => {
-          this.$router.push('/')
+          this.$router.push(constants.path.TOP)
           window.location.reload()
         })
         .catch(function (error) {

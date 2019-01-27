@@ -8,12 +8,12 @@ Vue.use(Router)
 export default new Router({
   routes: [
     {
-      path: '/',
+      path: constants.path.TOP,
       name: 'HelloWorld',
       component: HelloWorld
     },
     {
-      path: '/login',
+      path: constants.path.LOGIN,
       component: Login,
       meta: {
         isPublic: true
