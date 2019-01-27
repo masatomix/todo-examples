@@ -28,3 +28,8 @@ npm test
 ```
 
 For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+
+LoginURL '/login'
+main '/'
+mutations user loginStatus https://vuex.vuejs.org/ja/guide/mutations.html
+
