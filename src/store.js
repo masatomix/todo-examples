@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import createPersistedState from 'vuex-persistedstate'
+import constants from '@/constants'
 
 Vue.use(Vuex)
 
@@ -11,10 +12,10 @@ export default new Vuex.Store({
     loginStatus: false
   },
   mutations: {
-    user (state, user) {
+    [constants.mutations.user] (state, user) {
       state.user = user
     },
-    loginStatus (state, loginStatus) {
+    [constants.mutations.loginStatus] (state, loginStatus) {
       state.loginStatus = loginStatus
     }
   },
