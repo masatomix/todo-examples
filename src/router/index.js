@@ -4,6 +4,7 @@ import HelloWorld from '@/components/HelloWorld'
 import Login from '@/components/Login'
 import SignUp from '@/components/SignUp'
 import Token from '@/components/Token'
+import Rails from '@/components/Rails'
 import constants from '@/constants'
 
 Vue.use(Router)
@@ -39,6 +40,10 @@ export default new Router({
     {
       path: constants.path.TOKEN_AUTH,
       component: Token
+    },
+    {
+      path: constants.path.RAILS,
+      component: Rails
     }
   ]
 })
