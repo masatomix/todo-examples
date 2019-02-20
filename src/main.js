@@ -23,7 +23,6 @@ Vue.config.productionTip = false
 
 firebase.auth().onAuthStateChanged(function (user) {
   if (user) {
-    console.log(JSON.stringify(user))
     // User is signed in.
     store.commit(constants.mutations.user, user)
     store.commit(constants.mutations.loginStatus, true)

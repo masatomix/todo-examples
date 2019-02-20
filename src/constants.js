@@ -4,7 +4,8 @@ export default {
     TOP: '/',
     SIGN_UP: '/signup',
     TOKEN: '/token',
-    TOKEN_AUTH: '/token_auth'
+    TOKEN_AUTH: '/token_auth',
+    RAILS: '/rails'
   },
   mutations: {
     user: 'user',
