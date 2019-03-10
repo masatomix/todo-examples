@@ -38,10 +38,6 @@
       </button>
     </div>
 
-    <div class="form-signin">
-      <b-link v-bind:to='signupPath'>SignUpする</b-link>
-    </div>
-
   </b-container>
 </template>
 

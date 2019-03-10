@@ -12,6 +12,7 @@ import constants from '@/constants'
 import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
+import Cookies from 'js-cookie'
 Vue.use(BootstrapVue)
 
 // if (!firebase.apps.length) {
@@ -26,9 +27,18 @@ firebase.auth().onAuthStateChanged(function (user) {
     // User is signed in.
     store.commit(constants.mutations.user, user)
     store.commit(constants.mutations.loginStatus, true)
+
+    const expiresIn = 60 * 60 * 24
+    const options = { maxAge: expiresIn }
+    // const options = { maxAge: expiresIn, , secure: true }
+
+    console.log(user.uid)
+    Cookies.set('userid', user.uid, options)
   } else {
     store.commit(constants.mutations.user, {})
     store.commit(constants.mutations.loginStatus, false)
+
+    Cookies.remove('userid')
   }
 })
 
@@ -36,7 +46,10 @@ router.beforeEach((to, from, next) => {
   const currentUser = store.state.user
   if (currentUser.uid) {
     if (to.path === constants.path.LOGIN) {
-      firebase.auth().signOut().then(() => next())
+      firebase
+        .auth()
+        .signOut()
+        .then(() => next())
     }
   }
 
