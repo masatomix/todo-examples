@@ -6,20 +6,17 @@ import oauthConfig from './oauthConfig'
 
 admin.initializeApp()
 
-export const chat = functions.pubsub
+export const chat = functions.https.onRequest(async (req, res) => {
+  await sendSlack()
+  res.send('ok')
+})
+
+export const chat_pub = functions.pubsub
   .topic('slackChatTopic')
-  .onPublish(message => {
-    admin
-      .firestore()
-      .collection('slackToken')
-      .get()
-      .then(querySnapshot => {
-        querySnapshot.forEach(doc => {
-          console.log(`Firebase ID: ${doc.id} へSlack通知`)
-          console.log(`token: ${JSON.stringify(doc.data())}`)
-        })
-      })
+  .onPublish(async message => {
+    await sendSlack()
   })
+
 // $ gcloud pubsub topics publish slackChatTopic  --message '{"name":"Xenia"}'
 
 // // Start writing Firebase Functions
@@ -142,6 +139,20 @@ function addCookie (res, key, value) {
   const options = { maxAge: expiresIn, httpOnly: true }
   // const options = { maxAge: expiresIn, httpOnly: true, secure: true }
   res.setHeader('Set-Cookie', cookie.serialize(key, value, options))
+}
+
+async function sendSlack () {
+  const querySnapshot = await admin
+    .firestore()
+    .collection('slackToken')
+    .get()
+
+  querySnapshot.forEach(doc => {
+    const fbUserId = doc.id
+    const jsonData = doc.data()
+    console.log('Firebase UserID:', fbUserId, 'へのSlack通知')
+    console.log('token:', jsonData.access_token)
+  })
 }
 
 // https://firebase.google.com/docs/hosting/functions

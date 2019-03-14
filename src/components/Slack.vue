@@ -15,13 +15,11 @@
 </template>
 
 <script>
-import firebase from 'firebase'
-
 export default {
   name: 'Slack',
   methods: {
     popup () {
-      const url =  '/api/oauth/'
+      const url = '/api/oauth/'
       window.open(
         url,
         'pop',

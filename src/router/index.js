@@ -7,6 +7,7 @@ import constants from '@/constants'
 Vue.use(Router)
 
 export default new Router({
+  mode: 'history',
   routes: [
     {
       path: constants.path.TOP,
