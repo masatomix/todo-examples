@@ -23,6 +23,12 @@ export const chat_pub = functions.pubsub
 // // https://firebase.google.com/docs/functions/typescript
 //
 export const oauth = functions.https.onRequest(async (req, res) => {
+  if (req.query.userid) {
+    addCookie(res, 'userid', req.query.userid)
+    res.redirect('./oauth')
+    return
+  }
+
   const code = req.query.code
 
   // errorでリダイレクトされたとき
@@ -150,8 +156,29 @@ async function sendSlack () {
   querySnapshot.forEach(doc => {
     const fbUserId = doc.id
     const jsonData = doc.data()
-    console.log('Firebase UserID:', fbUserId, 'へのSlack通知')
-    console.log('token:', jsonData.access_token)
+
+    const option = {
+      url: 'https://slack.com/api/chat.postMessage',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        Authorization: `Bearer ${jsonData.access_token}`
+      },
+      json: {
+        channel: '#general',
+        text: `${fbUserId} です、今日は！`
+      }
+    }
+    request(option, (error, response, body) => {
+      if (error) {
+        console.log('error:', error)
+        return
+      }
+      if (response && body) {
+        console.log('status Code:', response && response.statusCode)
+        console.log(body)
+      }
+    })
   })
 }
 

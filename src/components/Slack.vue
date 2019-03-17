@@ -15,11 +15,16 @@
 </template>
 
 <script>
+import restConfig from '@/restConfig'
 export default {
   name: 'Slack',
   methods: {
     popup () {
-      const url = '/api/oauth/'
+      const url = [
+        restConfig.apiUri,
+        '?userid=',
+        this.$store.state.user.uid
+      ].join('')
       window.open(
         url,
         'pop',

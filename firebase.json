@@ -8,14 +8,6 @@
     ],
     "rewrites": [
       {
-        "source": "/api/oauth",
-        "function": "oauth"
-      },
-      {
-        "source": "/api/chat",
-        "function": "chat"
-      },
-      {
         "source": "**",
         "destination": "/index.html"
       }
