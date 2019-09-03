@@ -52,6 +52,20 @@ error_description: ${req.query.error_description}
     return
   }
 
+  // そもそもidTokenがなかったら後続を続ける意味がないので、正当性チェック verifyIdToken もここで実施
+  const cookies = cookie.parse(req.headers.cookie || '')
+  const idToken = cookies.idToken
+
+  let userId = ''
+  // idTokenをチェックする必要あり
+  try {
+    userId = await verifyIdToken(idToken)
+  } catch (error) {
+    console.log(error.message)
+    res.status(400).send('idTokenが正しくありません12')
+    return
+  }
+
   // codeがなかったとき、まずは認可画面へ遷移
   if (!code) {
     const randomValue = getRandomString()
@@ -70,24 +84,11 @@ error_description: ${req.query.error_description}
       oauthConfig.scope
     ].join('')
 
-    addCookie(res, 'state', randomValue)
+    setAttributeById(idToken, 'state', randomValue)
     res.redirect(authorization_endpoint_uri)
   } else {
-    // そもそもidTokenがなかったら後続を続ける意味がないので、正当性チェック verifyIdToken もここで実施
-    const cookies = cookie.parse(req.headers.cookie || '')
-    const idToken = cookies.idToken
-
-    let userId = ''
-    // idTokenをチェックする必要あり
-    try {
-      userId = await verifyIdToken(idToken)
-    } catch (error) {
-      console.log(error.message)
-      res.status(400).send('idTokenが正しくありません12')
-      return
-    }
-
-    if (!checkCSRF(req, res)) {
+    const csrf = await checkCSRF(req, res, idToken)
+    if (!csrf) {
       res
         .status(400)
         .send('前回のリクエストと今回のstate値が一致しないため、エラー。')
@@ -152,11 +153,13 @@ async function verifyIdToken(idToken) {
   return decodedToken.uid
 }
 
-function checkCSRF(req, res) {
+async function checkCSRF(req, res, idToken) {
   const state = req.query.state
 
-  const cookies = cookie.parse(req.headers.cookie || '')
-  const sessionState = cookies.state
+  // const cookies = cookie.parse(req.headers.cookie || '')
+  // const sessionState = cookies.state
+
+  const sessionState = await getAttributeById(idToken, 'state')
 
   console.log('requestState: ' + state)
   console.log('sessionState: ' + sessionState)
@@ -204,6 +207,48 @@ async function sendSlack() {
       }
     })
   })
+}
+
+function setAttributeById(sessionId: string, key: string, value: string) {
+  // const ref = this.db.collection('todos').doc(key) // キー指定して
+  const ref = admin
+    .firestore()
+    .collection('session')
+    .doc(sessionId)
+
+  ref.get().then(docref => {
+    if (!docref.exists) {
+      const target: any = {}
+      target[key] = value
+      // admin.firestore().collection('session').add(target)
+      admin
+        .firestore()
+        .collection('session')
+        .doc(sessionId)
+        .set(target)
+    } else {
+      const target: any = docref.data()
+      target[key] = value
+      ref.set(target)
+    }
+  })
+}
+
+async function getAttributeById(sessionId: string, key: string) {
+  const docref = await admin
+    .firestore()
+    .collection('session')
+    .doc(sessionId)
+    .get()
+
+  // const docref = await ref.get()
+  let returnValue: any = {}
+  if (!docref.exists) {
+    return null
+  } else {
+    returnValue = docref.data()
+  }
+  return returnValue[key]
 }
 
 // https://firebase.google.com/docs/hosting/functions
