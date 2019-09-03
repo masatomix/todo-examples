@@ -16,14 +16,20 @@
 
 <script>
 import restConfig from '@/restConfig'
+import firebase from 'firebase'
 export default {
   name: 'Slack',
   methods: {
-    popup () {
+    async popup () {
+      const token = await firebase.auth().currentUser.getIdToken()
+      console.log(token)
+      // const user= JSON.parse(JSON.stringify(this.$store.state.user))
+      // console.log(user.stsTokenManager.accessToken)
+
       const url = [
         restConfig.apiUri,
-        '?userid=',
-        this.$store.state.user.uid
+        '?idToken=',
+        token
       ].join('')
       window.open(
         url,
