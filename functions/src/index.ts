@@ -128,7 +128,7 @@ error_description: ${req.query.error_description}
   }
 })
 
-function doRequest(option) {
+function doRequest (option) {
   return new Promise((resolve, reject) => {
     request(option, (error, response, body) => {
       if (!error && response.statusCode == 200) {
@@ -140,7 +140,7 @@ function doRequest(option) {
   })
 }
 
-function getRandomString() {
+function getRandomString () {
   var S = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
   var N = 50
   const randomValue = Array.from(Array(N))
@@ -149,7 +149,7 @@ function getRandomString() {
   return randomValue
 }
 
-async function verifyIdToken(idToken) {
+async function verifyIdToken (idToken) {
   const decodedToken = await admin.auth().verifyIdToken(idToken)
 
   const iss_aud_check =
@@ -164,7 +164,7 @@ async function verifyIdToken(idToken) {
   return decodedToken.uid
 }
 
-async function checkCSRF(req, res, idToken) {
+async function checkCSRF (req, res, idToken) {
   const state = req.query.state
 
   // const cookies = cookie.parse(req.headers.cookie || '')
@@ -177,7 +177,7 @@ async function checkCSRF(req, res, idToken) {
   return state === sessionState
 }
 
-function addCookie(res, key, value) {
+function addCookie (res, key, value) {
   res.setHeader('Cache-Control', 'private') // Hosting経由だと、これがないとset cookieが削除される
   const expiresIn = 60 * 60 * 24
   const options = { maxAge: expiresIn, httpOnly: true }
@@ -185,7 +185,7 @@ function addCookie(res, key, value) {
   res.setHeader('Set-Cookie', cookie.serialize(key, value, options))
 }
 
-async function sendSlack() {
+async function sendSlack () {
   const querySnapshot = await admin
     .firestore()
     .collection('slackToken')
@@ -220,7 +220,7 @@ async function sendSlack() {
   })
 }
 
-function setAttributeById(sessionId: string, key: string, value: string) {
+function setAttributeById (sessionId: string, key: string, value: string) {
   // const ref = this.db.collection('todos').doc(key) // キー指定して
   const ref = admin
     .firestore()
@@ -245,7 +245,7 @@ function setAttributeById(sessionId: string, key: string, value: string) {
   })
 }
 
-async function getAttributeById(sessionId: string, key: string) {
+async function getAttributeById (sessionId: string, key: string) {
   const docref = await admin
     .firestore()
     .collection('session')
