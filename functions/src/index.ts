@@ -2,6 +2,7 @@ import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import * as request from 'request'
 import * as cookie from 'cookie'
+import session from './session'
 import oauthConfig from './oauthConfig'
 import oidcConfig from './oidcConfig'
 
@@ -85,7 +86,7 @@ error_description: ${req.query.error_description}
       oauthConfig.scope
     ].join('')
 
-    setAttributeById(idToken, 'state', randomValue)
+    session.setAttributeById(idToken, 'state', randomValue)
     res.redirect(authorization_endpoint_uri)
   } else {
     const csrf = await checkCSRF(req, res, idToken)
@@ -170,7 +171,7 @@ async function checkCSRF (req, res, idToken) {
   // const cookies = cookie.parse(req.headers.cookie || '')
   // const sessionState = cookies.state
 
-  const sessionState = await getAttributeById(idToken, 'state')
+  const sessionState = await session.getAttributeById(idToken, 'state')
 
   console.log('requestState: ' + state)
   console.log('sessionState: ' + sessionState)
@@ -218,48 +219,6 @@ async function sendSlack () {
       }
     })
   })
-}
-
-function setAttributeById (sessionId: string, key: string, value: string) {
-  // const ref = this.db.collection('todos').doc(key) // キー指定して
-  const ref = admin
-    .firestore()
-    .collection('session')
-    .doc(sessionId)
-
-  ref.get().then(docref => {
-    if (!docref.exists) {
-      const target: any = {}
-      target[key] = value
-      // admin.firestore().collection('session').add(target)
-      admin
-        .firestore()
-        .collection('session')
-        .doc(sessionId)
-        .set(target)
-    } else {
-      const target: any = docref.data()
-      target[key] = value
-      ref.set(target)
-    }
-  })
-}
-
-async function getAttributeById (sessionId: string, key: string) {
-  const docref = await admin
-    .firestore()
-    .collection('session')
-    .doc(sessionId)
-    .get()
-
-  // const docref = await ref.get()
-  let returnValue: any = {}
-  if (!docref.exists) {
-    return null
-  } else {
-    returnValue = docref.data()
-  }
-  return returnValue[key]
 }
 
 // https://firebase.google.com/docs/hosting/functions
