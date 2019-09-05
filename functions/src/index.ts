@@ -2,7 +2,9 @@ import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import * as request from 'request'
 import * as cookie from 'cookie'
+import session from './session'
 import oauthConfig from './oauthConfig'
+import oidcConfig from './oidcConfig'
 
 admin.initializeApp()
 
@@ -23,8 +25,16 @@ export const chat_pub = functions.pubsub
 // // https://firebase.google.com/docs/functions/typescript
 //
 export const oauth = functions.https.onRequest(async (req, res) => {
-  if (req.query.userid) {
-    addCookie(res, 'userid', req.query.userid)
+  if (req.query.idToken) {
+    // idTokenをチェックする必要あり
+    try {
+      await verifyIdToken(req.query.idToken)
+    } catch (error) {
+      console.log(error.message)
+      res.status(400).send('idTokenが正しくありません00')
+      return
+    }
+    addCookie(res, 'idToken', req.query.idToken)
     res.redirect('./oauth')
     return
   }
@@ -41,6 +51,20 @@ error_uri: ${req.query.error_uri}
 error_description: ${req.query.error_description}
 `
     res.send(message)
+    return
+  }
+
+  // そもそもidTokenがなかったら後続を続ける意味がないので、正当性チェック verifyIdToken もここで実施
+  const cookies = cookie.parse(req.headers.cookie || '')
+  const idToken = cookies.idToken
+
+  let userId = ''
+  // idTokenをチェックする必要あり
+  try {
+    userId = await verifyIdToken(idToken)
+  } catch (error) {
+    console.log(error.message)
+    res.status(400).send('idTokenが正しくありません12')
     return
   }
 
@@ -62,10 +86,11 @@ error_description: ${req.query.error_description}
       oauthConfig.scope
     ].join('')
 
-    addCookie(res, 'state', randomValue)
+    session.setAttributeById(idToken, 'state', randomValue)
     res.redirect(authorization_endpoint_uri)
   } else {
-    if (!checkCSRF(req, res)) {
+    const csrf = await checkCSRF(req, res, idToken)
+    if (!csrf) {
       res
         .status(400)
         .send('前回のリクエストと今回のstate値が一致しないため、エラー。')
@@ -91,9 +116,6 @@ error_description: ${req.query.error_description}
     }
 
     const body: any = await doRequest(options)
-
-    const cookies = cookie.parse(req.headers.cookie || '')
-    const userId = cookies.userid
 
     console.log(userId)
 
@@ -128,11 +150,28 @@ function getRandomString () {
   return randomValue
 }
 
-function checkCSRF (req, res) {
+async function verifyIdToken (idToken) {
+  const decodedToken = await admin.auth().verifyIdToken(idToken)
+
+  const iss_aud_check =
+    decodedToken.iss == oidcConfig.iss && decodedToken.aud == oidcConfig.aud
+  if (!iss_aud_check) {
+    console.log(`iss(Expected): ${oidcConfig.iss}`)
+    console.log(`iss(Actual  ): ${decodedToken.iss}`)
+    console.log(`aud(Expected): ${oidcConfig.aud}`)
+    console.log(`aud(Actual  ): ${decodedToken.aud}`)
+    throw new Error('issもしくはaudが想定外でした')
+  }
+  return decodedToken.uid
+}
+
+async function checkCSRF (req, res, idToken) {
   const state = req.query.state
 
-  const cookies = cookie.parse(req.headers.cookie || '')
-  const sessionState = cookies.state
+  // const cookies = cookie.parse(req.headers.cookie || '')
+  // const sessionState = cookies.state
+
+  const sessionState = await session.getAttributeById(idToken, 'state')
 
   console.log('requestState: ' + state)
   console.log('sessionState: ' + sessionState)
