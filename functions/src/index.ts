@@ -3,6 +3,7 @@ import * as admin from 'firebase-admin'
 import * as request from 'request'
 import * as cookie from 'cookie'
 import oauthConfig from './oauthConfig'
+import oidcConfig from './oidcConfig'
 
 admin.initializeApp()
 
@@ -150,6 +151,16 @@ function getRandomString() {
 
 async function verifyIdToken(idToken) {
   const decodedToken = await admin.auth().verifyIdToken(idToken)
+
+  const iss_aud_check =
+    decodedToken.iss == oidcConfig.iss && decodedToken.aud == oidcConfig.aud
+  if (!iss_aud_check) {
+    console.log(`iss(Expected): ${oidcConfig.iss}`)
+    console.log(`iss(Actual  ): ${decodedToken.iss}`)
+    console.log(`aud(Expected): ${oidcConfig.aud}`)
+    console.log(`aud(Actual  ): ${decodedToken.aud}`)
+    throw new Error('issもしくはaudが想定外でした')
+  }
   return decodedToken.uid
 }
 
