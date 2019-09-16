@@ -25,21 +25,6 @@ export const chat_pub = functions.pubsub
 // // https://firebase.google.com/docs/functions/typescript
 //
 export const oauth = functions.https.onRequest(async (req, res) => {
-  if (req.query.idToken) {
-    // idTokenをチェックする必要あり
-    try {
-      await verifyIdToken(req.query.idToken)
-    } catch (error) {
-      console.log(error.message)
-      res.status(400).send('idTokenが正しくありません00')
-      return
-    }
-    addCookie(res, 'idToken', req.query.idToken)
-    res.redirect('./oauth')
-    return
-  }
-
-  const code = req.query.code
 
   // errorでリダイレクトされたとき
   // ユーザがキャンセルしたときはココなので、そこそこちゃんと実装しないと。。(今んとこ適当実装)
@@ -54,22 +39,27 @@ error_description: ${req.query.error_description}
     return
   }
 
-  // そもそもidTokenがなかったら後続を続ける意味がないので、正当性チェック verifyIdToken もここで実施
-  const cookies = cookie.parse(req.headers.cookie || '')
-  const idToken = cookies.idToken
-
-  let userId = ''
-  // idTokenをチェックする必要あり
-  try {
-    userId = await verifyIdToken(idToken)
-  } catch (error) {
-    console.log(error.message)
-    res.status(400).send('idTokenが正しくありません12')
-    return
-  }
+  const code = req.query.code
 
   // codeがなかったとき、まずは認可画面へ遷移
   if (!code) {
+    const reqIdToken = req.query.idToken
+    if (!reqIdToken) {
+      console.log('codeがないのに、req.query.idToken もない')
+      res.status(400).send('req.query.idToken が取れませんでした')
+      return
+    }
+
+    // idTokenをチェックする必要あり
+    try {
+      await verifyIdToken(reqIdToken)
+    } catch (error) {
+      console.log(error.message)
+      res.status(400).send('req.query.idToken が正しくありません<br />' + error.message)
+      return
+    }
+    addCookie(res, 'idToken', reqIdToken)
+
     const randomValue = getRandomString()
     console.log('randomValue: ' + randomValue)
 
@@ -86,9 +76,23 @@ error_description: ${req.query.error_description}
       oauthConfig.scope
     ].join('')
 
-    session.setAttributeById(idToken, 'state', randomValue)
+    session.setAttributeById(reqIdToken, 'state', randomValue)
     res.redirect(authorization_endpoint_uri)
   } else {
+    // そもそもidTokenがなかったら後続を続ける意味がないので、正当性チェック verifyIdToken もここで実施
+    const cookies = cookie.parse(req.headers.cookie || '')
+    const idToken = cookies.idToken
+
+    let userId = ''
+    // idTokenをチェックする必要あり
+    try {
+      userId = await verifyIdToken(idToken)
+    } catch (error) {
+      console.log(error.message)
+      res.status(400).send('cookies.idToken が正しくありません。そもそも取得できなかったかも。<br />' + error.message)
+      return
+    }
+
     const csrf = await checkCSRF(req, res, idToken)
     if (!csrf) {
       res
@@ -141,6 +145,7 @@ function doRequest (option) {
   })
 }
 
+// https://qiita.com/fukasawah/items/db7f0405564bdc37820e 感謝！
 function getRandomString () {
   var S = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
   var N = 50
@@ -168,11 +173,9 @@ async function verifyIdToken (idToken) {
 async function checkCSRF (req, res, idToken) {
   const state = req.query.state
 
-  // const cookies = cookie.parse(req.headers.cookie || '')
-  // const sessionState = cookies.state
-
   const sessionState = await session.getAttributeById(idToken, 'state')
 
+  session.invalidate(idToken)
   console.log('requestState: ' + state)
   console.log('sessionState: ' + sessionState)
   return state === sessionState
@@ -186,7 +189,7 @@ function addCookie (res, key, value) {
   res.setHeader('Set-Cookie', cookie.serialize(key, value, options))
 }
 
-async function sendSlack () {
+async function sendSlack() {
   const querySnapshot = await admin
     .firestore()
     .collection('slackToken')

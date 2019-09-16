@@ -40,7 +40,15 @@ const me = {
       returnValue = docref.data()
     }
     return returnValue[key]
+  },
+
+  async invalidate (sessionId: string) {
+    await admin
+      .firestore()
+      .collection('session')
+      .doc(sessionId).delete()
   }
+
 }
 
 export default me
